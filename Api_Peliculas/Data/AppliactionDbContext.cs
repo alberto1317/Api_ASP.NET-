@@ -7,7 +7,7 @@ namespace Api_Peliculas.Data
         
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            //: base(options)
+            : base(options)
         { 
         }
         //Aquí pasan todas las entidades (MOdelos)
