@@ -11,7 +11,7 @@ namespace Api_Peliculas.Data
         { 
         }
         //Aquí pasan todas las entidades (MOdelos)
-        public DbSet<Categoria> Categorias { get; set; }
+        public DbSet<Categoria> Categoria { get; set; }
     }
 
 }
