@@ -13,11 +13,11 @@ namespace Api_Peliculas.Controllers
     [ApiController]
     public class CategoriasController : ControllerBase
     {
-    
+
         private readonly ICategoriaRepositorio _ctRepo;
         private readonly IMapper _mapper;
 
-        public CategoriasController(ICategoriaRepositorio ctRepo,IMapper mapper)
+        public CategoriasController(ICategoriaRepositorio ctRepo, IMapper mapper)
         {
             _ctRepo = ctRepo;
             _mapper = mapper;
@@ -31,7 +31,7 @@ namespace Api_Peliculas.Controllers
             var ListaCategorias = _ctRepo.GetCategorias();
             var ListaCategoriasDto = new List<CategoriaDto>();
             foreach (var Lista in ListaCategorias)
-                {
+            {
                 ListaCategoriasDto.Add(_mapper.Map<CategoriaDto>(Lista));
             }
             return Ok(ListaCategoriasDto);
@@ -60,35 +60,36 @@ namespace Api_Peliculas.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult CrearCategoria([FromBody] CrearCategoriaDto crearCategriaDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            if (crearCategriaDto ==null){
-             return BadRequest(ModelState);
+            if (crearCategriaDto == null) {
+                return BadRequest(ModelState);
             }
 
             if (_ctRepo.ExisteCategoria(crearCategriaDto.Nombre))
-                {
-                    ModelState.AddModelError("", "La categoria ya existe");
-                    return StatusCode(404, ModelState);
-                }
-                var categoria = _mapper.Map<Categoria>(crearCategriaDto);
-                if (!_ctRepo.CrearCategoria(categoria))
-                {
-                    ModelState.AddModelError("", $"Algo salio mal, al guardar el registro{categoria.Nombre}");
-                    return StatusCode(4004, ModelState);
-                }
-                return CreatedAtRoute("GetCategoria", new { categoriaId = categoria.Id }, categoria);
+            {
+                ModelState.AddModelError("", "La categoria ya existe");
+                return StatusCode(404, ModelState);
+            }
+            var categoria = _mapper.Map<Categoria>(crearCategriaDto);
+            if (!_ctRepo.CrearCategoria(categoria))
+            {
+                ModelState.AddModelError("", $"Algo salio mal, al guardar el registro{categoria.Nombre}");
+                return StatusCode(4004, ModelState);
+            }
+            return CreatedAtRoute("GetCategoria", new { categoriaId = categoria.Id }, categoria);
         }
 
         [HttpPatch("{categoriaId:int}", Name = "ActualizarPatchCategoria")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public IActionResult ActualizarPatchCategoria(int categoriaId,[FromBody] CategoriaDto categoriaDto)
+        public IActionResult ActualizarPatchCategoria(int categoriaId, [FromBody] CategoriaDto categoriaDto)
         {
             if (!ModelState.IsValid)
             {
@@ -97,6 +98,44 @@ namespace Api_Peliculas.Controllers
             if (categoriaDto == null || categoriaId != categoriaDto.Id)
             {
                 return BadRequest(ModelState);
+            }
+
+            var categoriaexiste = _ctRepo.GetCategoria(categoriaId);
+            if (categoriaexiste == null)
+            {
+                return NotFound($"No se encontró la categoría con ID {categoriaId}");
+            }
+
+            var categoria = _mapper.Map<Categoria>(categoriaDto);
+            if (!_ctRepo.ActualizarCategoria(categoria))
+            {
+                ModelState.AddModelError("", $"Algo salio mal actualizando el registro{categoria.Nombre}");
+                return StatusCode(500, ModelState);
+            }
+            return NoContent();
+
+        }
+        [HttpPut("{categoriaId:int}", Name = "ActualizarPutCategoria")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public IActionResult ActualizarPutCategoria(int categoriaId, [FromBody] CategoriaDto categoriaDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            if (categoriaDto == null || categoriaId != categoriaDto.Id)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var categoriaexiste = _ctRepo.GetCategoria(categoriaId);
+            if (categoriaexiste == null)
+            {
+                return NotFound($"No se encontró la categoría con ID {categoriaId}");
             }
 
             var categoria = _mapper.Map<Categoria>(categoriaDto);
