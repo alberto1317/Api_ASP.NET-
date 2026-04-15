@@ -5,6 +5,8 @@ namespace Api_Peliculas.Modelos
 {
     public class Pelicula
     {
+        internal int catId;
+
         [Key]
         public int Id { get; set; }
         public string Nombre { get; set; }
